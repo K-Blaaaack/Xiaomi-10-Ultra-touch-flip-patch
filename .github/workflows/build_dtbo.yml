@@ -23,14 +23,11 @@ jobs:
         run: chmod +x scripts/build_dtbo.sh
 
       - name: Build MIUI DTBO
-        run: |
-          echo "Building MIUI DTBO..."
-          scripts/build_dtbo.sh dtbo/miui_touch_invert_overlay.dts dtbo_fixed_miui.img
+        run: scripts/build_dtbo.sh dtbo/miui_touch_invert_overlay.dts dtbo_fixed_miui.img
 
       - name: Build AOSP DTBO
-        run: |
-          echo "Building AOSP DTBO..."
-          scripts/build_dtbo.sh dtbo/aosp_touch_invert_overlay.dts dtbo_fixed_aosp.img
+        run: scripts/build_dtbo.sh dtbo/aosp_touch_invert_overlay.dts dtbo_fixed_aosp.img
+
 
       - name: Upload DTBO artifacts
         uses: actions/upload-artifact@v4
