@@ -2,46 +2,40 @@ name: Build DTBO
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
+    paths:
+      - 'dtbo/**'
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-dtbo:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout 仓库
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # 2. 设置 Python 3
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      # 3. 安装依赖（如果 mkdtboimg.py 需要额外依赖，可在这里 pip install）
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y device-tree-compiler python3
-          python -m pip install --upgrade pip
-          pip install --upgrade setuptools
-      
-      # 4. 创建输出目录
-      - name: Create output dir
-        run: mkdir -p out
+          sudo apt install -y device-tree-compiler python3 python3-pip
+          pip3 install --upgrade pip
 
-      # 5. 编译 DTBO
-      - name: Build DTBO images
+      - name: Make build script executable
+        run: chmod +x scripts/build_dtbo.sh
+
+      - name: Build MIUI DTBO
         run: |
-          chmod +x scripts/build_dtbo.sh
-          ./scripts/build_dtbo.sh
+          echo "Building MIUI DTBO..."
+          scripts/build_dtbo.sh dtbo/miui_touch_invert_overlay.dts dtbo_fixed_miui.img
 
-      # 6. 上传产物（使用 v4 版本）
-      - name: Upload DTBO
+      - name: Build AOSP DTBO
+        run: |
+          echo "Building AOSP DTBO..."
+          scripts/build_dtbo.sh dtbo/aosp_touch_invert_overlay.dts dtbo_fixed_aosp.img
+
+      - name: Upload DTBO artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dtbo
-          path: out/dtbo.img
+          name: dtbo-images
+          path: |
+            dtbo_fixed_miui.img
+            dtbo_fixed_aosp.img
