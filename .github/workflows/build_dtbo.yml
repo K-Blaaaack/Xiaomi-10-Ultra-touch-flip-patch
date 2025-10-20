@@ -16,7 +16,16 @@ jobs:
     - name: 安装依赖
       run: |
         sudo apt-get update
-        sudo apt-get install -y device-tree-compiler android-tools-fastboot
+        sudo apt-get install -y device-tree-compiler unzip wget
+
+    - name: 下载 mkdtboimg
+      run: |
+        wget https://dl.google.com/android/repository/mkdtboimg-linux.zip
+        unzip mkdtboimg-linux.zip
+        chmod +x mkdtboimg
+        mv mkdtboimg $HOME/.local/bin/
+        export PATH=$HOME/.local/bin:$PATH
+        mkdtboimg --version  # 测试
 
     - name: 编译 DTBO
       run: |
