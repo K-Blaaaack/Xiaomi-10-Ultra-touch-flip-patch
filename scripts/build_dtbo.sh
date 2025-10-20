@@ -4,21 +4,14 @@
 
 set -e
 
-# 获取脚本所在目录
 SCRIPT_DIR=$(dirname "$0")
-
-# 输出文件
-OUT=dtbo.img
-# 页大小，可根据设备需求修改
-PAGE_SIZE=4096
-
-# DTS 源码目录
 DTBO_DIR="$SCRIPT_DIR/../dtbo"
-# 临时 DTB 输出目录
 TMP_DIR="$SCRIPT_DIR/dtb_tmp"
+OUT="dtbo.img"
+PAGE_SIZE=4096
+MKDTBO="$SCRIPT_DIR/mkdtboimg.py"
 
 # 检查 mkdtboimg.py 是否存在
-MKDTBO="$SCRIPT_DIR/mkdtboimg.py"
 if [ ! -f "$MKDTBO" ]; then
     echo "Error: mkdtboimg.py not found!"
     exit 1
@@ -35,8 +28,10 @@ for dts in "$DTBO_DIR"/*.dts; do
     dtc -I dts -O dtb -o "$dtb" "$dts"
 done
 
-# 找到生成的 DTB 文件
+# 把 DTB 文件放入数组
 DTB_FILES=("$TMP_DIR"/*.dtb)
+
+# 检查是否有 DTB 文件
 if [ ${#DTB_FILES[@]} -eq 0 ]; then
     echo "Error: No DTB files generated!"
     exit 1
