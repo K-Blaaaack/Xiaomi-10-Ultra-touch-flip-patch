@@ -5,11 +5,16 @@
 set -e
 
 SCRIPT_DIR=$(dirname "$0")
-DTBO_DIR="$SCRIPT_DIR/../dtbo"
 TMP_DIR="$SCRIPT_DIR/dtb_tmp"
 OUT="dtbo.img"
 PAGE_SIZE=4096
 MKDTBO="$SCRIPT_DIR/mkdtboimg.py"
+
+# DTS 文件列表（硬编码）
+DTS_FILES=(
+    "$SCRIPT_DIR/../dtbo/aosp_touch_invert_overlay.dts"
+    "$SCRIPT_DIR/../dtbo/miui_touch_invert_overlay.dts"
+)
 
 # 检查 mkdtboimg.py 是否存在
 if [ ! -f "$MKDTBO" ]; then
@@ -22,23 +27,15 @@ mkdir -p "$TMP_DIR"
 
 # 编译所有 DTS 文件为 DTB
 echo "Compiling DTS -> DTB..."
-for dts in "$DTBO_DIR"/*.dts; do
+for dts in "${DTS_FILES[@]}"; do
     dtb="$TMP_DIR/$(basename "${dts%.dts}.dtb")"
     echo "  $dts -> $dtb"
     dtc -I dts -O dtb -o "$dtb" "$dts"
 done
 
-# 把 DTB 文件放入数组
-DTB_FILES=("$TMP_DIR"/*.dtb)
-
-# 检查是否有 DTB 文件
-if [ ${#DTB_FILES[@]} -eq 0 ]; then
-    echo "Error: No DTB files generated!"
-    exit 1
-fi
-
-# 打包 DTB -> DTBO
-echo "Generating DTBO: $OUT ..."
-python3 "$MKDTBO" create "$OUT" --page_size "$PAGE_SIZE" "${DTB_FILES[@]}"
+# 打包 DTB -> DTBO（直接硬编码 DTB 路径）
+python3 "$MKDTBO" create "$OUT" --page_size "$PAGE_SIZE" \
+    "$TMP_DIR/aosp_touch_invert_overlay.dtb" \
+    "$TMP_DIR/miui_touch_invert_overlay.dtb"
 
 echo "DTBO generated successfully: $OUT"
