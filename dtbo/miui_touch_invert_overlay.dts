@@ -1,0 +1,25 @@
+/dts-v1/;
+/ {
+    compatible = "xiaomi,cas-dtbo-touch-invert-miui";
+
+    fragment@0 {
+        target-path = "/";
+        __overlay__ {
+            touchpanel_invert: touchpanel_invert {
+                compatible = "fixed,invert-touch-y-miui";
+                touchpanel,swap-axes;
+                touchpanel,invert-y;
+            };
+        };
+    };
+
+    fragment@1 {
+        target = <&i2c0>; 
+        __overlay__ {
+            touchscreen@38 {
+                status = "okay";
+                touchpanel,invert-y;
+            };
+        };
+    };
+};
