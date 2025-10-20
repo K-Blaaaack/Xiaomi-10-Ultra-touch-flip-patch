@@ -44,6 +44,6 @@ fi
 
 # 打包 DTB -> DTBO
 echo "Generating DTBO: $OUT ..."
-python3 "$MKDTBO" create "$OUT" --page_size $PAGE_SIZE "${DTB_FILES[@]}"
+python3 "$MKDTBO" create "$OUT" --page_size "$PAGE_SIZE" "${DTB_FILES[@]}"
 
 echo "DTBO generated successfully: $OUT"
