@@ -14,7 +14,7 @@ jobs:
 
       - name: 下载 Python mkdtboimg
         run: |
-          wget -qO mkdtboimg.py https://android.googlesource.com/platform/system/libufdt/+/master/utils/src/mkdtboimg.py
+          wget -qO mkdtboimg.py https://github.com/K-Blaaaack/mkdtboimg/blob/main/mkdtboimg.py
           chmod +x mkdtboimg.py
 
       - name: 编译 DTBO
