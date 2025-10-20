@@ -1,40 +1,29 @@
 name: Build DTBO
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: 安装依赖
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y device-tree-compiler unzip wget
+      - name: 安装依赖
+        run: sudo apt-get update && sudo apt-get install -y device-tree-compiler python3 unzip wget
 
-    - name: 下载 mkdtboimg
-      run: |
-        wget https://dl.google.com/android/repository/mkdtboimg-linux.zip
-        unzip mkdtboimg-linux.zip
-        chmod +x mkdtboimg
-        mv mkdtboimg $HOME/.local/bin/
-        export PATH=$HOME/.local/bin:$PATH
-        mkdtboimg --version  # 测试
+      - name: 下载 Python mkdtboimg
+        run: |
+          wget -qO mkdtboimg.py https://android.googlesource.com/platform/system/libufdt/+/master/utils/src/mkdtboimg.py
+          chmod +x mkdtboimg.py
 
-    - name: 编译 DTBO
-      run: |
-        chmod +x scripts/build_dtbo.sh
-        ./scripts/build_dtbo.sh
+      - name: 编译 DTBO
+        run: |
+          chmod +x scripts/build_dtbo.sh
+          ./scripts/build_dtbo.sh
 
-    - name: 上传产物
-      uses: actions/upload-artifact@v4
-      with:
-        name: dtbo-artifacts
-        path: out/
-        retention-days: 90
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtbo
+          path: out/*.img

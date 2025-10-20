@@ -1,20 +1,21 @@
 #!/bin/bash
 set -e
 
-OUT=out
-mkdir -p ${OUT}
+# Python mkdtboimg 路径
+MKDTBOIMG="mkdtboimg.py"
 
-DTC=dtc
-MKDTOB=mkdtboimg
+# 输出目录
+OUTDIR="./out"
+mkdir -p $OUTDIR
 
-# 构建 MIUI
-echo "编译 MIUI DTBO..."
-${DTC} -I dts -O dtb -o ${OUT}/overlay_miui.dtb dtbo/miui_touch_invert_overlay.dts
-${MKDTOB} --page_size 4096 --output ${OUT}/dtbo_fixed_miui.img ${OUT}/overlay_miui.dtb
+# 编译 MIUI 版本
+dtc -I dts -O dtb -o $OUTDIR/miui.dtb dtbo/miui_touch_invert_overlay.dts
+python3 $MKDTBOIMG --page_size 4096 --output $OUTDIR/dtbo_miui_invert.img $OUTDIR/miui.dtb
 
-# 构建 AOSP
-echo "编译 AOSP DTBO..."
-${DTC} -I dts -O dtb -o ${OUT}/overlay_aosp.dtb dtbo/aosp_touch_invert_overlay.dts
-${MKDTOB} --page_size 4096 --output ${OUT}/dtbo_fixed_aosp.img ${OUT}/overlay_aosp.dtb
+# 编译 AOSP 版本（如果有）
+if [ -f dtbo/aosp_touch_invert_overlay.dts ]; then
+    dtc -I dts -O dtb -o $OUTDIR/aosp.dtb dtbo/aosp_touch_invert_overlay.dts
+    python3 $MKDTBOIMG --page_size 4096 --output $OUTDIR/dtbo_aosp_invert.img $OUTDIR/aosp.dtb
+fi
 
-echo "✅ 已生成 dtbo_fixed_miui.img 和 dtbo_fixed_aosp.img"
+echo "✅ DTBO 编译完成，文件位于 $OUTDIR"
