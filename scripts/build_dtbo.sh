@@ -34,8 +34,7 @@ for dts in "${DTS_FILES[@]}"; do
 done
 
 # 打包 DTB -> DTBO（直接硬编码 DTB 路径）
-python3 "$MKDTBO" create "$OUT" --page_size "$PAGE_SIZE" \
-    "$TMP_DIR/aosp_touch_invert_overlay.dtb" \
-    "$TMP_DIR/miui_touch_invert_overlay.dtb"
+python3 "$MKDTBO" create "$OUT" --page_size 4096 "$TMP_DIR/aosp_touch_invert_overlay.dtb" "$TMP_DIR/miui_touch_invert_overlay.dtb"
+
 
 echo "DTBO generated successfully: $OUT"
