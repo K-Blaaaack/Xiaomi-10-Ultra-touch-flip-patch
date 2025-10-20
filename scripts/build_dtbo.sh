@@ -14,7 +14,7 @@ DTS_DIR="../dtbo"
 DTB_TMP_DIR="./dtb_tmp"
 
 # 检查 mkdtboimg.py 是否存在
-if [ ! -f "../mkdtboimg.py" ]; then
+if [ ! -f "./scripts/mkdtboimg.py" ]; then
     echo "Error: mkdtboimg.py not found!"
     exit 1
 fi
@@ -39,6 +39,6 @@ fi
 
 # 打包 DTB -> DTBO
 echo "Generating DTBO: $OUT ..."
-python3 ../mkdtboimg.py create "$OUT" --page_size $PAGE_SIZE $DTB_FILES
+python3 ./scripts/mkdtboimg.py create "$OUT" --page_size $PAGE_SIZE $DTB_FILES
 
 echo "DTBO generated successfully: $OUT"
