@@ -1,0 +1,52 @@
+name: Build DTBO
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout 仓库
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 设置 Python 3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. 安装依赖（如果 mkdtboimg.py 需要额外依赖，可在这里 pip install）
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y device-tree-compiler python3
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools
+      
+      - name: 下载 Python mkdtboimg
+        run: |
+          wget -qO mkdtboimg.py https://raw.githubusercontent.com/K-Blaaaack/mkdtboimg/refs/tags/1/mkdtboimg.py
+          chmod +x mkdtboimg.py
+
+      # 4. 创建输出目录
+      - name: Create output dir
+        run: mkdir -p out
+
+      # 5. 编译 DTBO
+      - name: Build DTBO images
+        run: |
+          chmod +x scripts/build_dtbo.sh
+          ./scripts/build_dtbo.sh
+
+      # 6. 上传产物（使用 v4 版本）
+      - name: Upload DTBO
+        uses: actions/upload-artifact@v4
+        with:
+          name: dtbo
+          path: out/dtbo.img
