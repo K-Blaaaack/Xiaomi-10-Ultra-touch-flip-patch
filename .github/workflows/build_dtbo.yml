@@ -1,54 +1,47 @@
-# .github/workflows/build_dtbo.yml
 name: Build DTBO
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  pull_request:
 
 jobs:
-  build-dtbo:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       # 1. Checkout 仓库
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. 安装依赖
+      # 2. 设置 Python 3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. 安装依赖（如果 mkdtboimg.py 需要额外依赖，可在这里 pip install）
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y device-tree-compiler python3
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools
 
-      # 3. 创建输出目录
-      - name: Prepare directories
+      # 4. 创建输出目录
+      - name: Create output dir
+        run: mkdir -p out
+
+      # 5. 编译 DTBO
+      - name: Build DTBO images
         run: |
-          mkdir -p scripts/dtb_tmp
-          mkdir -p out
+          chmod +x scripts/build_dtbo.sh
+          ./scripts/build_dtbo.sh
 
-      # 4. 编译 DTS -> DTB
-      - name: Compile DTS to DTB
-        run: |
-          for dts in dtbo/*.dts; do
-            dtb="scripts/dtb_tmp/$(basename "${dts%.dts}.dtb")"
-            echo "Compiling $dts -> $dtb"
-            dtc -I dts -O dtb -o "$dtb" "$dts"
-          done
-
-      # 5. 打包 DTB -> DTBO
-      - name: Generate DTBO
-        run: |
-          DTB_FILES=$(find scripts/dtb_tmp -type f -name "*.dtb" | sort)
-          if [ -z "$DTB_FILES" ]; then
-            echo "No DTB files found!"
-            exit 1
-          fi
-          python3 mkdtboimg.py create out/dtbo.img --page_size 4096 $DTB_FILES
-
-      # 6. 上传产物
+      # 6. 上传产物（使用 v4 版本）
       - name: Upload DTBO
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dtbo
           path: out/dtbo.img
