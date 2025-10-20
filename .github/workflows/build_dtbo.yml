@@ -5,91 +5,41 @@ on:
     paths:
       - 'dtbo/**'
       - 'scripts/**'
-    branches: [ main, master, develop ]
-  pull_request:
-    paths:
-      - 'dtbo/**'
-      - 'scripts/**'
-    branches: [ main, master, develop ]
   workflow_dispatch:  # 手动运行按钮
 
 jobs:
-  build-dtbo:
-    name: Build MIUI & AOSP DTBO
+  build:
     runs-on: ubuntu-latest
-
+    
     steps:
     # 1. 检出代码
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
+    - uses: actions/checkout@v4
+    
     # 2. 安装依赖
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y -qq device-tree-compiler python3 python3-pip
-        pip3 install --upgrade pip --quiet
-
-    # 3. 准备脚本（仅 chmod，无验证）
-    - name: Prepare build scripts
-      run: |
-        chmod +x scripts/build_dtbo.sh
-        chmod +x scripts/mkdtboimg.py
-        echo "✅ Scripts ready"
-
-    # 4. 构建 MIUI DTBO
-    - name: Build MIUI DTBO
-      id: miui
-      run: |
-        if [ -f "dtbo/miui_touch_invert_overlay.dts" ]; then
-          echo "🔨 Building MIUI DTBO..."
+    - run: sudo apt install -y device-tree-compiler python3
+    
+    # 3. 设置脚本权限
+    - run: chmod +x scripts/build_dtbo.sh scripts/mkdtboimg.py
+    
+    # 4. 构建所有 DTBO
+    - run: |
+        # MIUI
+        if [ -f dtbo/miui_touch_invert_overlay.dts ]; then
           scripts/build_dtbo.sh dtbo/miui_touch_invert_overlay.dts dtbo_fixed_miui.img
-          SIZE=$(wc -c < dtbo_fixed_miui.img 2>/dev/null || echo "0")
-          echo "✅ MIUI: ${SIZE} bytes"
-          echo "miui_size=${SIZE}" >> $GITHUB_OUTPUT
-          echo "miui_success=true" >> $GITHUB_OUTPUT
-        else
-          echo "⚠️ MIUI DTS not found, skipping"
-          echo "miui_size=0" >> $GITHUB_OUTPUT
-          echo "miui_success=false" >> $GITHUB_OUTPUT
         fi
-
-    # 5. 构建 AOSP DTBO
-    - name: Build AOSP DTBO
-      id: aosp
-      run: |
-        if [ -f "dtbo/aosp_touch_invert_overlay.dts" ]; then
-          echo "🔨 Building AOSP DTBO..."
+        
+        # AOSP  
+        if [ -f dtbo/aosp_touch_invert_overlay.dts ]; then
           scripts/build_dtbo.sh dtbo/aosp_touch_invert_overlay.dts dtbo_fixed_aosp.img
-          SIZE=$(wc -c < dtbo_fixed_aosp.img 2>/dev/null || echo "0")
-          echo "✅ AOSP: ${SIZE} bytes"
-          echo "aosp_size=${SIZE}" >> $GITHUB_OUTPUT
-          echo "aosp_success=true" >> $GITHUB_OUTPUT
-        else
-          echo "⚠️ AOSP DTS not found, skipping"
-          echo "aosp_size=0" >> $GITHUB_OUTPUT
-          echo "aosp_success=false" >> $GITHUB_OUTPUT
         fi
-
-    # 6. 构建摘要
-    - name: Build Summary
+        
+        # 显示结果
+        ls -la dtbo_fixed_*.img 2>/dev/null || echo "No DTBO files generated"
+    
+    # 5. 上传产物
+    - uses: actions/upload-artifact@v4
       if: always()
-      run: |
-        echo "## 🎯 DTBO Build Results" >> $GITHUB_STEP_SUMMARY
-        echo "| Type | Status | Size |" >> $GITHUB_STEP_SUMMARY
-        echo "|------|--------|------|" >> $GITHUB_STEP_SUMMARY
-        echo "| MIUI | ${{ steps.miui.outputs.miui_success == 'true' && '✅ Success' || '⚠️ Skipped' }} | ${{ steps.miui.outputs.miui_size }}B |" >> $GITHUB_STEP_SUMMARY
-        echo "| AOSP | ${{ steps.aosp.outputs.aosp_success == 'true' && '✅ Success' || '⚠️ Skipped' }} | ${{ steps.aosp.outputs.aosp_size }}B |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**📦 Artifacts**: See below" >> $GITHUB_STEP_SUMMARY
-
-    # 7. 上传产物
-    - name: Upload DTBO Artifacts
-      if: steps.miui.outputs.miui_success == 'true' || steps.aosp.outputs.aosp_success == 'true'
-      uses: actions/upload-artifact@v4
       with:
         name: dtbo-patches-${{ github.run_number }}
-        path: |
-          dtbo_fixed_miui.img
-          dtbo_fixed_aosp.img
+        path: dtbo_fixed_*.img
         retention-days: 30
