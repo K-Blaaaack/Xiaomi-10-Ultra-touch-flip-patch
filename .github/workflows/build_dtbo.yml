@@ -14,7 +14,7 @@ jobs:
 
       - name: 下载 Python mkdtboimg
         run: |
-          wget -qO mkdtboimg.py https://github.com/K-Blaaaack/mkdtboimg/releases/download/1/mkdtboimg.py
+          wget -qO mkdtboimg.py https://raw.githubusercontent.com/K-Blaaaack/mkdtboimg/refs/tags/1/mkdtboimg.py
           chmod +x mkdtboimg.py
 
       - name: 编译 DTBO
