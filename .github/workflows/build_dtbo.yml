@@ -23,7 +23,8 @@ jobs:
         ./scripts/build_dtbo.sh
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dtbo-artifacts
         path: out/
+        retention-days: 90
