@@ -34,7 +34,7 @@ DTB_SIZE=$(wc -c < "$TEMP_DTB")
 echo "✅ DTB: ${DTB_SIZE} bytes"
 
 echo "🔨 Creating DTBO..."
-python3 scripts/mkdtboimg.py create "$OUT" --page_size 4096 "$TEMP_DTB"
+python3 scripts/mkdtboimg.py create "$OUT" "$TEMP_DTB"  # 默认 page_size=2048
 
 if [ ! -f "$OUT" ]; then
     echo "❌ DTBO creation failed"
