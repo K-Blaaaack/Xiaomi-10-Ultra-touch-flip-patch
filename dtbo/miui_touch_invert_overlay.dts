@@ -1,15 +1,22 @@
 /dts-v1/;
-/ {
-    compatible = "xiaomi,cas-dtbo-touch-invert-miui";
+/plugin/;
 
+/ {
     fragment@0 {
-        target-path = "/";
+        target = <&fts>;  /* FocalTech 节点 */
         __overlay__ {
-            touchpanel_invert: touchpanel_invert {
-                compatible = "fixed,invert-touch-y-miui";
-                touchpanel,swap-axes;
-                touchpanel,invert-y;
-            };
+            /* 反转 Y 轴 */
+            touch-invert-y = <1>;
+            /* 备用：FocalTech 可能需要的属性 */
+            touch-y-reverse = <1>;
+            touch-swap-xy = <0>;  /* 不交换 X/Y */
+            /* 坐标范围（1080x2400） */
+            touch-x-min = <0>;
+            touch-x-max = <1080>;
+            touch-y-min = <0>;
+            touch-y-max = <2400>;
+            /* FocalTech 兼容性 */
+            compatible = "focaltech,fts";
         };
     };
 };

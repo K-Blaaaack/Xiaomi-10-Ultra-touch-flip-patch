@@ -1,14 +1,23 @@
 /dts-v1/;
-/ {
-    compatible = "generic,cas-dtbo-touch-invert-aosp";
+/plugin/;
 
+/ {
     fragment@0 {
-        target-path = "/";
+        target = <&fts>;
         __overlay__ {
-            touchpanel_invert_aosp: touchpanel_invert_aosp {
-                compatible = "generic,invert-touch-y";
-                touchpanel,invert-y;
-            };
+            /* 反转 Y 轴 */
+            touch-invert-y = <1>;
+            touch-y-reverse = <1>;
+            touch-swap-xy = <0>;
+            /* 坐标范围 */
+            touch-x-min = <0>;
+            touch-x-max = <1080>;
+            touch-y-min = <0>;
+            touch-y-max = <2400>;
+            /* FocalTech 兼容性 */
+            compatible = "focaltech,fts";
+            /* AOSP 特定参数 */
+            touch-pressure-scale = <0x66>;  /* 示例值，视驱动调整 */
         };
     };
 };
