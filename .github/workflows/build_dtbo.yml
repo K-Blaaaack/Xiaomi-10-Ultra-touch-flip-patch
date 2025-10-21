@@ -5,38 +5,23 @@ on:
     paths:
       - 'dtbo/**'
       - 'scripts/**'
-  workflow_dispatch:  # 手动运行按钮
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
     steps:
-    # 1. 检出代码
     - uses: actions/checkout@v4
-    
-    # 2. 安装依赖
     - run: sudo apt install -y device-tree-compiler python3
-    
-    # 3. 设置脚本权限
     - run: chmod +x scripts/build_dtbo.sh scripts/mkdtboimg.py
-    
-    # 4. 构建所有 DTBO
     - run: |
-        # MIUI
         if [ -f dtbo/miui_touch_invert_overlay.dts ]; then
           scripts/build_dtbo.sh dtbo/miui_touch_invert_overlay.dts dtbo_fixed_miui.img
         fi
-        
-        # AOSP  
         if [ -f dtbo/aosp_touch_invert_overlay.dts ]; then
           scripts/build_dtbo.sh dtbo/aosp_touch_invert_overlay.dts dtbo_fixed_aosp.img
         fi
-        
-        # 显示结果
         ls -la dtbo_fixed_*.img 2>/dev/null || echo "No DTBO files generated"
-    
-    # 5. 上传产物
     - uses: actions/upload-artifact@v4
       if: always()
       with:
